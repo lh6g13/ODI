@@ -1,5 +1,3 @@
 d3.csv("data.csv").get(function(error,data){
-console.log(data);
-
-
+  console.log(data);
 });
