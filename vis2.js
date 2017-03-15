@@ -1,29 +1,37 @@
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
-
+    width = 1000 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom;
+    padding = 100;
 /*
  * value accessor - returns the value to encode for a given data object.
  * scale - maps value to a visual display encoding, such as a pixel position.
  * map function - maps from data value to display value
  * axis - sets up axis
  */
+ d3.csv("data.csv")
+ .row(function (d) { return{ Completion_Date: new Date(d['Completion Date (B1)']),
+                             Lifecycle_Cost: Number(d['Lifecycle Cost']),
+                             Agency_Name: d['Agency Name']}; })
+ .get(function(error,data){
+
 
 // setup x
-var xValue = function(d) { return d.Calories;}, // data -> value
-    xScale = d3.scale.linear().range([0, width]), // value -> display
+var xValue = function(d) { return d.Completion_Date;}, // data -> value
+    xScale = d3.scale.linear().range([0,width]), // value -> display
     xMap = function(d) { return xScale(xValue(d));}, // data -> display
     xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 
 // setup y
-var yValue = function(d) { return d["Protein (g)"];}, // data -> value
+var yValue = function(d) { return d.Lifecycle_Cost;}, // data -> value
     yScale = d3.scale.linear().range([height, 0]), // value -> display
     yMap = function(d) { return yScale(yValue(d));}, // data -> display
     yAxis = d3.svg.axis().scale(yScale).orient("left");
 
+
 // setup fill color
-var cValue = function(d) { return d.Manufacturer;},
-    color = d3.scale.category10();
+var cValue = function(d) { return d.Agency_Name;},
+    color = d3.scale.ordinal()
+    .range(["#f27979", "#733939", "#f2beb6","#401100", "#f26d3d", "#8c3800", "#b27d59","#e57a00", "#4c3213", "#f2ba79", "#332d26", "#8c8169", "#665f00", "#ccc233", "#fffbbf","#454d26", "#b6f23d", "#7db359", "#00ff00","#004009", "#bfffd0", "#3df285", "#29a67c","#40fff2", "#60b9bf", "#2d5659"]);
 
 // add the graph canvas to the body of the webpage
 var svg = d3.select("body").append("svg")
@@ -36,16 +44,6 @@ var svg = d3.select("body").append("svg")
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-
-// load data
-d3.csv("cereal.csv", function(error, data) {
-
-  // change string (from CSV) into number format
-  data.forEach(function(d) {
-    d.Calories = +d.Calories;
-    d["Protein (g)"] = +d["Protein (g)"];
-//    console.log(d);
-  });
 
   // don't want dots overlapping axis, so add in buffer to data domain
   xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
@@ -61,7 +59,7 @@ d3.csv("cereal.csv", function(error, data) {
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("Calories");
+      .text("Completion Date");
 
   // y-axis
   svg.append("g")
@@ -73,7 +71,7 @@ d3.csv("cereal.csv", function(error, data) {
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Protein (g)");
+      .text("Lifecycle Cost");
 
   // draw dots
   svg.selectAll(".dot")
@@ -88,7 +86,7 @@ d3.csv("cereal.csv", function(error, data) {
           tooltip.transition()
                .duration(200)
                .style("opacity", .9);
-          tooltip.html(d["Cereal Name"] + "<br/> (" + xValue(d)
+          tooltip.html(d["Project ID"] + "<br/> (" + xValue(d)
 	        + ", " + yValue(d) + ")")
                .style("left", (d3.event.pageX + 5) + "px")
                .style("top", (d3.event.pageY - 28) + "px");
@@ -119,5 +117,5 @@ d3.csv("cereal.csv", function(error, data) {
       .attr("y", 9)
       .attr("dy", ".35em")
       .style("text-anchor", "end")
-      .text(function(d) { return d;})
+      .text(function(d) { return d; })
 });
